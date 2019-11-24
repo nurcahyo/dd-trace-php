@@ -6,8 +6,11 @@
 #include <sys/types.h>
 
 #include "compatibility.h"
+#include "dispatch.h"
 
 typedef struct ddtrace_span_t {
+  zend_execute_data *execute_data;
+  ddtrace_dispatch_t *dispatch;
     zval *span_data;
 #if PHP_VERSION_ID < 70000
     zval *exception;
@@ -28,7 +31,7 @@ typedef struct ddtrace_span_t {
 
 void ddtrace_init_span_stacks(TSRMLS_D);
 void ddtrace_free_span_stacks(TSRMLS_D);
-ddtrace_span_t *ddtrace_open_span(TSRMLS_D);
+ddtrace_span_t *ddtrace_open_span(zend_execute_data *execute_data, ddtrace_dispatch_t * TSRMLS_DC);
 void dd_trace_stop_span_time(ddtrace_span_t *span);
 void ddtrace_close_span(TSRMLS_D);
 void ddtrace_drop_span(TSRMLS_D);

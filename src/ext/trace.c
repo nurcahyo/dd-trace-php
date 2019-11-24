@@ -8,7 +8,6 @@
 #include "dispatch_compat.h"
 #include "logging.h"
 #include "memory_limit.h"
-#include "span.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(ddtrace);
 
@@ -19,32 +18,17 @@ ZEND_EXTERN_MODULE_GLOBALS(ddtrace);
 #define RETURN_VALUE_USED(opline) (!((opline)->result_type & EXT_TYPE_UNUSED))
 #endif
 
-void ddtrace_trace_dispatch(ddtrace_dispatch_t *dispatch, zend_function *fbc,
-                            zend_execute_data *execute_data TSRMLS_DC) {
-    int fcall_status;
-    const zend_op *opline = EX(opline);
-
-    zval *user_retval = NULL, *user_args;
+void ddtrace_end_span_with_tracing_closure(ddtrace_dispatch_t *dispatch, zend_execute_data *execute_data, zval *retval,
+                                           ddtrace_span_t *span TSRMLS_DC) {
+    zval *user_args;
 #if PHP_VERSION_ID < 70000
     ALLOC_INIT_ZVAL(user_retval);
-    ALLOC_INIT_ZVAL(user_args);
     zval *exception = NULL, *prev_exception = NULL;
 #else
     zend_object *exception = NULL, *prev_exception = NULL;
-    zval rv, user_args_zv;
+    zval user_args_zv;
     INIT_ZVAL(user_args_zv);
-    INIT_ZVAL(rv);
     user_args = &user_args_zv;
-    user_retval = (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : &rv);
-#endif
-
-    ddtrace_span_t *span = ddtrace_open_span(TSRMLS_C);
-#if PHP_VERSION_ID < 70000
-    fcall_status = ddtrace_forward_call(execute_data, fbc, user_retval TSRMLS_CC);
-#else
-    zend_fcall_info fci = {0};
-    zend_fcall_info_cache fcc = {0};
-    fcall_status = ddtrace_forward_call(EX(call), fbc, user_retval, &fci, &fcc TSRMLS_CC);
 #endif
     dd_trace_stop_span_time(span);
 
@@ -59,7 +43,7 @@ void ddtrace_trace_dispatch(ddtrace_dispatch_t *dispatch, zend_function *fbc,
     }
 
     BOOL_T keep_span = TRUE;
-    if (fcall_status == SUCCESS && Z_TYPE(dispatch->callable) == IS_OBJECT) {
+    if (Z_TYPE(dispatch->callable) == IS_OBJECT) {
         zend_error_handling error_handling;
         int orig_error_reporting = EG(error_reporting);
         EG(error_reporting) = 0;
@@ -69,7 +53,7 @@ void ddtrace_trace_dispatch(ddtrace_dispatch_t *dispatch, zend_function *fbc,
         zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
 #endif
         keep_span = ddtrace_execute_tracing_closure(&dispatch->callable, span->span_data, execute_data, user_args,
-                                                    user_retval, exception TSRMLS_CC);
+                                                    retval, exception TSRMLS_CC);
         zend_restore_error_handling(&error_handling TSRMLS_CC);
         EG(error_reporting) = orig_error_reporting;
         // If the tracing closure threw an exception, ignore it to not impact the original call
@@ -103,6 +87,28 @@ void ddtrace_trace_dispatch(ddtrace_dispatch_t *dispatch, zend_function *fbc,
         zend_throw_exception_internal(NULL TSRMLS_CC);
 #endif
     }
+}
+void ddtrace_trace_dispatch(ddtrace_dispatch_t *dispatch, zend_function *fbc,
+                            zend_execute_data *execute_data TSRMLS_DC) {
+    const zend_op *opline = EX(opline);
+    zval *user_retval = NULL;
+#if PHP_VERSION_ID < 70000
+    ALLOC_INIT_ZVAL(user_retval);
+#else
+    zval rv;
+    INIT_ZVAL(rv);
+    user_retval = (RETURN_VALUE_USED(opline) ? EX_VAR(opline->result.var) : &rv);
+#endif
+
+    ddtrace_span_t *span = ddtrace_open_span(execute_data, dispatch TSRMLS_CC);
+#if PHP_VERSION_ID < 70000
+    ddtrace_forward_call(execute_data, fbc, user_retval TSRMLS_CC);
+#else
+    zend_fcall_info fci = {0};
+    zend_fcall_info_cache fcc = {0};
+    ddtrace_forward_call(EX(call), fbc, user_retval, &fci, &fcc TSRMLS_CC);
+#endif
+    ddtrace_end_span_with_tracing_closure(dispatch, execute_data, user_retval, span TSRMLS_CC);
 
 #if PHP_VERSION_ID < 50500
     (void)opline;  // TODO Make work on PHP 5.4

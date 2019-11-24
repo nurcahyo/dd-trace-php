@@ -6,6 +6,7 @@
 
 void ddtrace_engine_hooks_minit(void);
 void ddtrace_engine_hooks_mshutdown(void);
+void ddtrace_engine_hooks_rinit(void);
 
 int ddtrace_opcode_default_dispatch(zend_execute_data *execute_data TSRMLS_DC);
 

@@ -192,8 +192,7 @@ int ddtrace_forward_call(zend_execute_data *execute_data, zend_function *fbc, zv
     return fcall_status;
 }
 
-void ddtrace_copy_function_args(zend_execute_data *execute_data, zval *user_args) {
-    zend_execute_data *ex = EX(call);
+void ddtrace_copy_function_args(zend_execute_data *ex, zval *user_args) {
     uint32_t i;
     zval *p, *q;
     uint32_t arg_count = ZEND_CALL_NUM_ARGS(ex);

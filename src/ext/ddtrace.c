@@ -163,6 +163,8 @@ static PHP_RINIT_FUNCTION(ddtrace) {
         return SUCCESS;
     }
 
+    ddtrace_engine_hooks_rinit();
+
     ddtrace_dispatch_init(TSRMLS_C);
     DDTRACE_G(disable_in_current_request) = 0;
 
