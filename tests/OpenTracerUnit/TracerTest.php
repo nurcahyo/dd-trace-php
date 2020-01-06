@@ -203,24 +203,21 @@ JSON;
         $tracer->flush();
     }
 
-    public function testPrioritySamplingIsAssigned()
-    {
-        $tracer = Tracer::make(new DebugTransport());
-        $tracer->startSpan(self::OPERATION_NAME);
-        $this->assertSame(
-            PrioritySampling::AUTO_KEEP,
-            $tracer->unwrapped()->getPrioritySampling()
-        );
-    }
-
     public function testPrioritySamplingInheritedFromDistributedTracingContext()
     {
         $distributedTracingContext = new DDSpanContext('', '', '', [], true);
         $distributedTracingContext->setPropagatedPrioritySampling(PrioritySampling::USER_REJECT);
         $tracer = Tracer::make(new DebugTransport());
-        $tracer->startSpan(self::OPERATION_NAME, [
+
+        /* todo: this does not become a root span?
+         * This is problematic for priority sampling
+         */
+        $tracer->startActiveSpan(self::OPERATION_NAME, [
             'child_of' => $distributedTracingContext,
         ]);
+
+        // The tracer's priority sampling is lazily done; need to flush
+        $tracer->flush();
         $this->assertSame(
             PrioritySampling::USER_REJECT,
             $tracer->unwrapped()->getPrioritySampling()
