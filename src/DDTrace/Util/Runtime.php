@@ -2,6 +2,8 @@
 
 namespace DDTrace\Util;
 
+use function Datadog\Trace\Util\dd_util_is_autoloader_registered;
+
 /**
  * Utilities related to the PHP runtime
  */
@@ -16,28 +18,6 @@ final class Runtime
      */
     public static function isAutoloaderRegistered($class, $method)
     {
-        $class = trim($class, '\\');
-        $autoloaders = spl_autoload_functions();
-        foreach ($autoloaders as $autoloader) {
-            if (!is_array($autoloader) || count($autoloader) !== 2) {
-                continue;
-            }
-
-            $registeredAutoloader = $autoloader[0];
-            $registeredMethod = $autoloader[1];
-            if (is_string($registeredAutoloader)) {
-                $compareClass = trim($registeredAutoloader, '\\');
-            } elseif (is_object($registeredAutoloader)) {
-                $compareClass = trim(get_class($registeredAutoloader), '\\');
-            } else {
-                continue;
-            }
-
-            if ($compareClass === $class && $registeredMethod === $method) {
-                return true;
-            }
-        }
-
-        return false;
+        return dd_util_is_autoloader_registered($class, $method);
     }
 }

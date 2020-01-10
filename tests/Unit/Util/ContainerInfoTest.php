@@ -5,6 +5,8 @@ namespace DDTrace\Tests\Unit\Util;
 use DDTrace\Util\ContainerInfo;
 use PHPUnit\Framework\TestCase;
 
+use function Datadog\Trace\Util\dd_util_get_container_id;
+
 final class ContainerInfoTest extends TestCase
 {
     private $mockCgroupProcFilePath = '/tmp/mock-cgroup-proc-file';
@@ -24,6 +26,7 @@ final class ContainerInfoTest extends TestCase
     {
         $this->ensureNoMockCGroupProcFile();
         $this->assertNull($this->containerInfo->getContainerId());
+        $this->assertNull(dd_util_get_container_id($this->mockCgroupProcFilePath));
     }
 
     public function testEmptyFile()
@@ -36,6 +39,7 @@ final class ContainerInfoTest extends TestCase
             // phpcs:enable
         ]);
         $this->assertNull($this->containerInfo->getContainerId());
+        $this->assertNull(dd_util_get_container_id($this->mockCgroupProcFilePath));
     }
 
     public function testFileNoReadPermissions()
@@ -49,6 +53,7 @@ final class ContainerInfoTest extends TestCase
         ], $path);
         $containerInfo = new ContainerInfo($path);
         $this->assertNull($containerInfo->getContainerId());
+        $this->assertNull(dd_util_get_container_id($path));
     }
 
     public function testLeadingTrailingWhitespaces()
@@ -63,6 +68,10 @@ final class ContainerInfoTest extends TestCase
         $this->assertSame(
             '3726184226f5d3147c25fdeab5b60097e378e8a720503a5e19ecfdf29f869860',
             $this->containerInfo->getContainerId()
+        );
+        $this->assertSame(
+            '3726184226f5d3147c25fdeab5b60097e378e8a720503a5e19ecfdf29f869860',
+            dd_util_get_container_id($this->mockCgroupProcFilePath)
         );
     }
 
@@ -79,6 +88,10 @@ final class ContainerInfoTest extends TestCase
         $this->assertSame(
             '3726184226f5d3147c25fdeab5b60097e378e8a720503a5e19ecfdf29f869860',
             $this->containerInfo->getContainerId()
+        );
+        $this->assertSame(
+            '3726184226f5d3147c25fdeab5b60097e378e8a720503a5e19ecfdf29f869860',
+            dd_util_get_container_id($this->mockCgroupProcFilePath)
         );
     }
 
@@ -106,6 +119,10 @@ final class ContainerInfoTest extends TestCase
             '3726184226f5d3147c25fdeab5b60097e378e8a720503a5e19ecfdf29f869860',
             $this->containerInfo->getContainerId()
         );
+        $this->assertSame(
+            '3726184226f5d3147c25fdeab5b60097e378e8a720503a5e19ecfdf29f869860',
+            dd_util_get_container_id($this->mockCgroupProcFilePath)
+        );
     }
 
     public function testK8S()
@@ -130,6 +147,10 @@ final class ContainerInfoTest extends TestCase
             '3e74d3fd9db4c9dd921ae05c2502fb984d0cde1b36e581b13f79c639da4518a1',
             $this->containerInfo->getContainerId()
         );
+        $this->assertSame(
+            '3e74d3fd9db4c9dd921ae05c2502fb984d0cde1b36e581b13f79c639da4518a1',
+            dd_util_get_container_id($this->mockCgroupProcFilePath)
+        );
     }
 
     public function testECS()
@@ -151,6 +172,10 @@ final class ContainerInfoTest extends TestCase
         $this->assertSame(
             '38fac3e99302b3622be089dd41e7ccf38aff368a86cc339972075136ee2710ce',
             $this->containerInfo->getContainerId()
+        );
+        $this->assertSame(
+            '38fac3e99302b3622be089dd41e7ccf38aff368a86cc339972075136ee2710ce',
+            dd_util_get_container_id($this->mockCgroupProcFilePath)
         );
     }
 
@@ -176,6 +201,10 @@ final class ContainerInfoTest extends TestCase
             '432624d2150b349fe35ba397284dea788c2bf66b885d14dfc1569b01890ca7da',
             $this->containerInfo->getContainerId()
         );
+        $this->assertSame(
+            '432624d2150b349fe35ba397284dea788c2bf66b885d14dfc1569b01890ca7da',
+            dd_util_get_container_id($this->mockCgroupProcFilePath)
+        );
     }
 
     public function testLinuxNonContainerizedFileNotWronglyParsedAsContainer()
@@ -195,6 +224,7 @@ final class ContainerInfoTest extends TestCase
             '1:name=systemd:/user.slice/user-0.slice/session-14.scope',
         ]);
         $this->assertNull($this->containerInfo->getContainerId());
+        $this->assertNull(dd_util_get_container_id($this->mockCgroupProcFilePath));
     }
 
     private function ensureNoMockCGroupProcFile()
