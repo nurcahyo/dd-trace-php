@@ -153,7 +153,6 @@ function dd_util_kvstore_get_for_resource($resource, $key, $default = null)
         : $default;
 }
 
-
 /**
  * Delete a key's value from an instance, if present.
  *
