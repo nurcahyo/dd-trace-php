@@ -14,6 +14,7 @@
 #include <ext/standard/info.h>
 
 #include "circuit_breaker.h"
+#include "comms_php.h"
 #include "compat_string.h"
 #include "compatibility.h"
 #include "coms.h"
@@ -714,17 +715,23 @@ typedef zend_long ddtrace_zpplong_t;
 #endif
 
 static PHP_FUNCTION(dd_trace_send_traces_via_thread) {
+    PHP5_UNUSED(return_value_used, this_ptr, return_value_ptr, ht TSRMLS_CC);
     char *url = NULL, *payload = NULL;
     ddtrace_zppstrlen_t url_len = 0, payload_len = 0;
     zval *curl_headers = NULL;
 
     if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "sas", &url, &url_len,
                                  &curl_headers, &payload, &payload_len) == FAILURE) {
-        if (DDTRACE_G(strict_mode)) {
-            zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0 TSRMLS_CC,
-                                    "Expected url, http headers, and http body");
-        }
+        ddtrace_log_debug("dd_trace_send_traces_via_thread() expects url, http headers, and http body");
         RETURN_FALSE
+    }
+
+    if (ddtrace_memoize_http_headers(Z_ARRVAL_P(curl_headers))) {
+        ddtrace_log_debug("Successfully memoized Agent HTTP headers");
+    }
+
+    if (!ddtrace_coms_buffer_data(DDTRACE_G(traces_group_id), payload, payload_len)) {
+        ddtrace_log_debug("Unable to send payload to background sender's buffer");
     }
 
     RETURN_TRUE

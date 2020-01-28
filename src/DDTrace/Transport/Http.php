@@ -141,11 +141,7 @@ final class Http implements Transport
             return;
         }
 
-        $curlHeaders = [
-            'Content-Type: ' . $this->encoder->getContentType(),
-            'Content-Length: ' . $bodySize,
-            'X-Datadog-Trace-Count: ' . $tracesCount,
-        ];
+        $curlHeaders = [];
 
         /* Curl will add Expect: 100-continue if it is a POST over a certain size. The trouble is that CURL will
          * wait for *1 second* for 100 Continue response before sending the rest of the data. This wait is
@@ -159,10 +155,22 @@ final class Http implements Transport
             $curlHeaders[] = "$key: $value";
         }
 
-        if (\dd_trace_env_config('DD_TRACE_BETA_SEND_TRACES_VIA_THREAD')) {
+        if (
+            \dd_trace_env_config('DD_TRACE_BETA_SEND_TRACES_VIA_THREAD')
+            && $this->encoder->getContentType() === 'application/msgpack'
+        ) {
             \dd_trace_send_traces_via_thread($url, $curlHeaders, $body);
             return;
         }
+
+        $curlHeaders = \array_merge(
+            $curlHeaders,
+            [
+                'Content-Type: ' . $this->encoder->getContentType(),
+                'Content-Length: ' . $bodySize,
+                'X-Datadog-Trace-Count: ' . $tracesCount,
+            ]
+        );
 
         $handle = curl_init($url);
         curl_setopt($handle, CURLOPT_POST, true);
