@@ -100,7 +100,11 @@ final class Http implements Transport
         }
         $tracesCount = $tracer->getTracesCount();
         $tracesPayload = $this->encoder->encodeTraces($tracer);
-        self::logDebug('About to send trace(s) to the agent');
+
+        if ($tracesCount === 0) {
+            self::logDebug('No finished traces to be sent to the agent');
+            return;
+        }
 
         // We keep the endpoint configuration option for backward compatibility instead of moving to an 'agent base url'
         // concept, but this should be probably revisited in the future.
@@ -109,6 +113,8 @@ final class Http implements Transport
             self::PRIORITY_SAMPLING_TRACE_AGENT_PATH,
             $this->config['endpoint']
         ) : $this->config['endpoint'];
+
+        self::logDebug('About to send trace(s) to the agent at {endpoint}', ['endpoint' => $endpoint]);
 
         $this->sendRequest($endpoint, $this->headers, $tracesPayload, $tracesCount);
     }
@@ -134,12 +140,6 @@ final class Http implements Transport
             ]);
             return;
         }
-        $handle = curl_init($url);
-        curl_setopt($handle, CURLOPT_POST, true);
-        curl_setopt($handle, CURLOPT_POSTFIELDS, $body);
-        curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($handle, CURLOPT_TIMEOUT_MS, $this->config['timeout']);
-        curl_setopt($handle, CURLOPT_CONNECTTIMEOUT_MS, $this->config['connect_timeout']);
 
         $curlHeaders = [
             'Content-Type: ' . $this->encoder->getContentType(),
@@ -158,6 +158,18 @@ final class Http implements Transport
         foreach ($headers as $key => $value) {
             $curlHeaders[] = "$key: $value";
         }
+
+        if (\dd_trace_env_config('DD_TRACE_BETA_SEND_TRACES_VIA_THREAD')) {
+            \dd_trace_send_traces_via_thread($url, $curlHeaders, $body);
+            return;
+        }
+
+        $handle = curl_init($url);
+        curl_setopt($handle, CURLOPT_POST, true);
+        curl_setopt($handle, CURLOPT_POSTFIELDS, $body);
+        curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($handle, CURLOPT_TIMEOUT_MS, $this->config['timeout']);
+        curl_setopt($handle, CURLOPT_CONNECTTIMEOUT_MS, $this->config['connect_timeout']);
 
         $isDebugEnabled = Configuration::get()->isDebugModeEnabled();
         if ($isDebugEnabled) {
