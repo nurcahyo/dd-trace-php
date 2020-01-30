@@ -11,10 +11,10 @@ class ExampleController extends BaseController
     {
         $tracer = GlobalTracer::get();
         $span = $tracer->getActiveSpan();
-        $span->setTag('my.log.tag.one', $this->generateRandomString(2000));
-        $span->setTag('my.log.tag.two', $this->generateRandomString(2000));
-        $span->setTag('my.log.tag.three', $this->generateRandomString(2000));
-        $span->setTag('my.log.tag.four', $this->generateRandomString(2000));
+        // $span->setTag('my.log.tag.one', $this->generateRandomString(2000));
+        // $span->setTag('my.log.tag.two', $this->generateRandomString(2000));
+        // $span->setTag('my.log.tag.three', $this->generateRandomString(2000));
+        // $span->setTag('my.log.tag.four', $this->generateRandomString(2000));
         error_log('This is the example action');
         return "hi!";
     }

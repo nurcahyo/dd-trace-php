@@ -287,7 +287,7 @@ services:
       - DD_API_KEY=${DATADOG_API_KEY}
       - DD_APM_ENABLED=true
       - DD_APM_NON_LOCAL_TRAFFIC=true
-      - DD_LOG_LEVEL=debug
+      - DD_LOG_LEVEL=trace
     networks:
       overhead:
 

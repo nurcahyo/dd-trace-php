@@ -132,6 +132,7 @@ void ddtrace_coms_disable_atexit_hook() { ptr_at_exit_callback = NULL; }
 #define DD_TRACE_COUNT_HEADER "X-Datadog-Trace-Count: "
 
 static void _curl_set_headers(struct _writer_loop_data_t *writer, size_t trace_count) {
+    fprintf(stderr, "Measured trace count at request time %d\n", trace_count);
     struct curl_slist *static_headers = (struct curl_slist *)atomic_load(&memoized_agent_curl_headers);
     struct curl_slist *headers = NULL;
     for (struct curl_slist *current = static_headers; current; current = current->next) {
@@ -143,6 +144,7 @@ static void _curl_set_headers(struct _writer_loop_data_t *writer, size_t trace_c
     char buffer[64];
     int bytes_written = snprintf(buffer, sizeof buffer, DD_TRACE_COUNT_HEADER "%zu", trace_count);
     if (bytes_written > ((int)sizeof(DD_TRACE_COUNT_HEADER)) - 1 && bytes_written < ((int)sizeof buffer)) {
+        fprintf(stderr, "Set trace count of: %s\n", buffer);
         headers = curl_slist_append(headers, buffer);
     }
 
@@ -155,10 +157,14 @@ static void _curl_set_headers(struct _writer_loop_data_t *writer, size_t trace_c
 }
 
 static void curl_send_stack(struct _writer_loop_data_t *writer, ddtrace_coms_stack_t *stack) {
+    fprintf(stderr, "curl_send_stack() stack size %d\n", stack->size);
     if (!writer->curl) {
+        fprintf(stderr, "writer->curl is being initialized\n");
         writer->curl = curl_easy_init();
         curl_easy_setopt(writer->curl, CURLOPT_READFUNCTION, ddtrace_coms_read_callback);
         curl_easy_setopt(writer->curl, CURLOPT_WRITEFUNCTION, dummy_write_callback);
+    } else {
+        fprintf(stderr, "writer->curl WAS ALREADY initialized\n");
     }
 
     if (writer->curl) {
