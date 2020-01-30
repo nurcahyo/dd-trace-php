@@ -1,1 +1,4 @@
 .git/
+.composer/
+vendor/
+tests/Frameworks

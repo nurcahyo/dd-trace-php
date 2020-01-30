@@ -222,6 +222,8 @@ services:
       - overhead-php-fpm-master
       - overhead-php-fpm-release
       - overhead-php-fpm-head
+    networks:
+      overhead:
 
   overhead-php-fpm-notracer:
     build:
@@ -229,9 +231,11 @@ services:
       dockerfile: ./tests/overhead/dockerfiles/Dockerfile_72_fpm_Laravel57
       target: notracer
     depends_on:
-      - agent
+      - overhead-agent
     volumes:
       - ./tests/overhead/callgrind-files:/var/www/callgrind-files
+    networks:
+      overhead:
 
   overhead-php-fpm-release:
     build:
@@ -239,11 +243,13 @@ services:
       dockerfile: ./tests/overhead/dockerfiles/Dockerfile_72_fpm_Laravel57
       target: release
       args:
-        - DD_TRACE_LIBRARY_VERSION=${DD_TRACE_LIBRARY_VERSION:-0.37.1}
+        - DD_TRACE_LIBRARY_VERSION=${DD_TRACE_LIBRARY_VERSION:-0.38.1}
     depends_on:
-      - agent
+      - overhead-agent
     volumes:
       - ./tests/overhead/callgrind-files:/var/www/callgrind-files
+    networks:
+      overhead:
 
   overhead-php-fpm-master:
     build:
@@ -251,9 +257,11 @@ services:
       dockerfile: ./tests/overhead/dockerfiles/Dockerfile_72_fpm_Laravel57
       target: master
     depends_on:
-      - agent
+      - overhead-agent
     volumes:
       - ./tests/overhead/callgrind-files:/var/www/callgrind-files
+    networks:
+      overhead:
 
   overhead-php-fpm-head:
     build:
@@ -261,10 +269,12 @@ services:
       dockerfile: ./tests/overhead/dockerfiles/Dockerfile_72_fpm_Laravel57
       target: head
     depends_on:
-      - agent
+      - overhead-agent
     volumes:
       - ./tests/overhead/callgrind-files:/var/www/callgrind-files
       - ./:/dd-trace-php
+    networks:
+      overhead:
 
   overhead-agent:
     image: datadog/agent:latest
@@ -278,7 +288,12 @@ services:
       - DD_APM_ENABLED=true
       - DD_APM_NON_LOCAL_TRAFFIC=true
       - DD_LOG_LEVEL=debug
+    networks:
+      overhead:
 
 ################################################################
 # End of images used for performance overhead calculation
 ################################################################
+
+networks:
+  overhead:

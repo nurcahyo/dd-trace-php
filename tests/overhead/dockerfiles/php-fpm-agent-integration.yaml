@@ -12,7 +12,7 @@ instances:
   ## you want to monitor (FPM `listen` directive in the config, usually
   ## a UNIX socket or TCP socket.
   #
-  - status_url: http://nginx-72-fpm-laravel-57/status
+  - status_url: http://overhead-nginx:8888/status
 
   ## @param ping_url - string - required
   ## Get a reliable service check of your FPM pool with `ping_url` parameter
@@ -24,7 +24,7 @@ instances:
   ## you want to monitor (FPM `listen` directive in the config, usually
   ## a UNIX socket or TCP socket.
   #
-    ping_url: http://nginx-72-fpm-laravel-57/ping
+    ping_url: http://overhead-nginx:8888/ping
 
   ## @param use_fastcgi - boolean - required - default: false
   ## Communicate directly with PHP-FPM using FastCGI
