@@ -386,7 +386,7 @@ size_t ddtrace_coms_read_callback(char *buffer, size_t size, size_t nitems, void
         if (read->bytes_to_write == 0) {
             break;
         }
-        written += write_array_header(buffer, buffer_size, written, num_elements);
+        // written += write_array_header(buffer, buffer_size, written, num_elements);
         read->position += sizeof(size_t) * 2;
 
         written += write_to_buffer(buffer, buffer_size, written, read);
