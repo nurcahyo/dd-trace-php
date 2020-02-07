@@ -1,5 +1,7 @@
 <?php
 
+require __DIR__ . '/../lib-php/index.php';
+
 require __DIR__ . '/../src/DDTrace/Log/LoggingTrait.php';
 require __DIR__ . '/../src/DDTrace/Configuration/Registry.php';
 require __DIR__ . '/../src/DDTrace/Contracts/Tracer.php';
