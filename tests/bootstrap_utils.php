@@ -20,8 +20,23 @@ function missing_ddtrace_class_fatal_autoloader($class)
         return;
     }
 
+    // Classes and namespaces moved to the functional API must not generate an error
+    $movedToFunctionalApi = [
+        'DDTrace\Util\ArrayKVStore',
+        'DDTrace\Util\ContainerInfo',
+        'DDTrace\Util\ObjectKVStore',
+        'DDTrace\Util\Versions',
+    ];
+    foreach ($movedToFunctionalApi as $pattern) {
+        if (substr($class, 0, strlen($pattern)) === $pattern) {
+            return;
+        }
+    }
+
     // Classes not loaded by any other autoloader or non test specific should raise exceptions in tests
-    throw new \Exception("add " . $class . " to one of dd_*_deps_autoloader.php");
+    throw new \Exception(
+        "add " . $class . " to one of dd_*_deps_autoloader.php or the whitelist in bootstrap_utils.php"
+    );
 }
 
 function prepend_test_autoloaders()
