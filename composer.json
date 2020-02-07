@@ -46,7 +46,10 @@
     "autoload-dev": {
         "psr-4": {
             "DDTrace\\Tests\\": "./tests/"
-        }
+        },
+        "files": [
+            "./lib-php/index.php"
+        ]
     },
     "prefer-stable": true,
     "scripts": {

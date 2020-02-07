@@ -124,7 +124,7 @@ function dd_util_is_autoloader_registered($class, $method)
  * @param string $key
  * @param mixed $value
  */
-function dd_util_kvstore_put_for_resource($resource, $key, $value)
+function dd_util_array_kvstore_put_for_resource($resource, $key, $value)
 {
     global $_resource_registry;
     if (_not_enough_resource_info($resource, $key)) {
@@ -141,7 +141,7 @@ function dd_util_kvstore_put_for_resource($resource, $key, $value)
  * @param mixed $default
  * @return mixed|null
  */
-function dd_util_kvstore_get_for_resource($resource, $key, $default = null)
+function dd_util_array_kvstore_get_for_resource($resource, $key, $default = null)
 {
     global $_resource_registry;
     if (_not_enough_resource_info($resource, $key)) {
@@ -158,10 +158,19 @@ function dd_util_kvstore_get_for_resource($resource, $key, $default = null)
  *
  * @param resource $resource
  */
-function dd_util_kvstore_delete_resource($resource)
+function dd_util_array_kvstore_delete_resource($resource)
 {
     global $_resource_registry;
     unset($_resource_registry[_get_resource_key($resource)]);
+}
+
+/**
+ * Clears the storage.
+ */
+function dd_util_array_kvstore_clear()
+{
+    global $_resource_registry;
+    $_resource_registry = [];
 }
 
 /**

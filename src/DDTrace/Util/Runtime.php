@@ -2,7 +2,7 @@
 
 namespace DDTrace\Util;
 
-use function Datadog\Trace\Util\dd_util_is_autoloader_registered;
+use Datadog\Trace\Util;
 
 /**
  * Utilities related to the PHP runtime
@@ -18,6 +18,6 @@ final class Runtime
      */
     public static function isAutoloaderRegistered($class, $method)
     {
-        return dd_util_is_autoloader_registered($class, $method);
+        return Util\dd_util_is_autoloader_registered($class, $method);
     }
 }

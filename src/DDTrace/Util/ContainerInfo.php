@@ -2,7 +2,7 @@
 
 namespace DDTrace\Util;
 
-use function Datadog\Trace\Util\dd_util_get_container_id;
+use Datadog\Trace\Util;
 
 /**
  * Utility class to extract container info.
@@ -25,6 +25,6 @@ class ContainerInfo
      */
     public function getContainerId()
     {
-        return dd_util_get_container_id($this->cgroupProcFile);
+        return Util\dd_util_get_container_id($this->cgroupProcFile);
     }
 }

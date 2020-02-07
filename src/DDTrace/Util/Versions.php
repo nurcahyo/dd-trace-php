@@ -2,8 +2,7 @@
 
 namespace DDTrace\Util;
 
-use function Datadog\Trace\Util\dd_util_php_version_matches;
-use function Datadog\Trace\Util\dd_util_version_matches;
+use Datadog\Trace\Util;
 
 /**
  * Utility functions to handle version numbers and matching.
@@ -16,7 +15,7 @@ final class Versions
      */
     public static function phpVersionMatches($version)
     {
-        return dd_util_php_version_matches($version);
+        return Util\dd_util_php_version_matches($version);
     }
 
     /**
@@ -26,6 +25,6 @@ final class Versions
      */
     public static function versionMatches($expected, $specimen)
     {
-        return dd_util_version_matches($expected, $specimen);
+        return Util\dd_util_version_matches($expected, $specimen);
     }
 }

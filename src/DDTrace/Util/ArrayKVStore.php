@@ -2,6 +2,8 @@
 
 namespace DDTrace\Util;
 
+use Datadog\Trace\Util;
+
 /**
  * A key value store that stores metadata into an array. If you have an object that you can use as a carrier, then
  * prefer ObjectKVStore as is provides a better performance. Use this if you do not have an object you can use as
@@ -9,8 +11,6 @@ namespace DDTrace\Util;
  */
 class ArrayKVStore
 {
-    private static $resource_registry = [];
-
     /**
      * Put or replaces a key with a specific value.
      *
@@ -20,10 +20,7 @@ class ArrayKVStore
      */
     public static function putForResource($resource, $key, $value)
     {
-        if (self::notEnoughResourceInfo($resource, $key)) {
-            return;
-        }
-        self::$resource_registry[self::getResourceKey($resource)][$key] = $value;
+        Util\dd_util_array_kvstore_put_for_resource($resource, $key, $value);
     }
 
     /**
@@ -36,13 +33,7 @@ class ArrayKVStore
      */
     public static function getForResource($resource, $key, $default = null)
     {
-        if (self::notEnoughResourceInfo($resource, $key)) {
-            return $default;
-        }
-        $resourceKey = self::getResourceKey($resource);
-        return isset(self::$resource_registry[$resourceKey][$key])
-            ? self::$resource_registry[$resourceKey][$key]
-            : $default;
+        return Util\dd_util_array_kvstore_get_for_resource($resource, $key, $default);
     }
 
     /**
@@ -52,8 +43,7 @@ class ArrayKVStore
      */
     public static function deleteResource($resource)
     {
-        $resourceKey = self::getResourceKey($resource);
-        unset(self::$resource_registry[$resourceKey]);
+        Util\dd_util_array_kvstore_delete_resource($resource);
     }
 
     /**
@@ -61,7 +51,7 @@ class ArrayKVStore
      */
     public static function clear()
     {
-        self::$resource_registry = [];
+        Util\dd_util_array_kvstore_clear();
     }
 
     /**

@@ -2,6 +2,8 @@
 
 namespace DDTrace\Util;
 
+use Datadog\Trace\Util;
+
 /**
  * A key value store that stores metadata into object instances.
  *
