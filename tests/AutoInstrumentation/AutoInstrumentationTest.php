@@ -31,6 +31,7 @@ class AutoInstrumentationTest extends BaseTestCase
             // file we should pick the tracer from the installed bundle
             ['composer_without_ddtrace_dependency', $currentTracerVersion, true],
 
+            // This is temporarily disabled as on 0.31.0 there is no the lib-php loaded
             // We want to make sure that the version declared in composer.json is picked up instead of the installed
             // version.
             ['composer_with_ddtrace_dependency', '0.31.0', true],
