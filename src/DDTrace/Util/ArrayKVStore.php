@@ -53,35 +53,4 @@ class ArrayKVStore
     {
         Util\dd_util_array_kvstore_clear();
     }
-
-    /**
-     * Tells whether or not a set of info is enough to be used in this storage.
-     *
-     * @param resource $resource
-     * @param string $key
-     * @return bool
-     */
-    private static function notEnoughResourceInfo($resource, $key)
-    {
-        return
-            !is_resource($resource)
-            || empty($key)
-            || !is_string($key);
-    }
-
-    /**
-     * Returns the unique resource key.
-     *
-     * @param resource $resource
-     * @return int
-     */
-    private static function getResourceKey($resource)
-    {
-        // Converting to integer a resource results in the "unique resource number assigned to the resource by PHP at
-        // runtime":
-        //   - http://php.net/manual/en/language.types.integer.php#language.types.integer.casting
-        // Resource ids are guaranteed to be unique per script execution:
-        //   - http://www.php.net/manual/en/language.types.string.php#language.types.string.casting
-        return intval($resource);
-    }
 }
