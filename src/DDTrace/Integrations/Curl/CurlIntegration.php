@@ -156,7 +156,8 @@ class CurlIntegration extends Integration
                     // Storing data to be used during exec as it cannot be retrieved at then.
                     Util\dd_util_array_kvstore_put_for_resource(
                         $ch,
-                        Format::CURL_HTTP_HEADERS, $options[CURLOPT_HTTPHEADER]
+                        Format::CURL_HTTP_HEADERS,
+                        $options[CURLOPT_HTTPHEADER]
                     );
                 }
 
