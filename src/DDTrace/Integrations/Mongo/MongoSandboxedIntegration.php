@@ -2,12 +2,12 @@
 
 namespace DDTrace\Integrations\Mongo;
 
+use Datadog\Trace\Util;
 use DDTrace\Integrations\SandboxedIntegration;
 use DDTrace\Obfuscation;
 use DDTrace\SpanData;
 use DDTrace\Tag;
 use DDTrace\Type;
-use DDTrace\Util\Versions;
 
 class MongoSandboxedIntegration extends SandboxedIntegration
 {
@@ -23,7 +23,7 @@ class MongoSandboxedIntegration extends SandboxedIntegration
 
     public function init()
     {
-        if (!extension_loaded('mongo') || Versions::phpVersionMatches('5.4')) {
+        if (!extension_loaded('mongo') || Util\dd_util_php_version_matches('5.4')) {
             return SandboxedIntegration::NOT_AVAILABLE;
         }
 

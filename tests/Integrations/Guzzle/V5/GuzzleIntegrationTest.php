@@ -2,6 +2,7 @@
 
 namespace DDTrace\Tests\Integrations\Guzzle\V5;
 
+use Datadog\Trace\Util;
 use DDTrace\Configuration;
 use DDTrace\Integrations\IntegrationsLoader;
 use DDTrace\Sampling\PrioritySampling;
@@ -12,7 +13,6 @@ use GuzzleHttp\Ring\Client\MockHandler;
 use DDTrace\Tests\Common\SpanAssertion;
 use DDTrace\Tests\Common\IntegrationTestCase;
 use DDTrace\GlobalTracer;
-use DDTrace\Util\Versions;
 
 final class GuzzleIntegrationTest extends IntegrationTestCase
 {
@@ -135,7 +135,7 @@ final class GuzzleIntegrationTest extends IntegrationTestCase
         $this->assertSame($traces[0][0]['span_id'], (int) $found['headers']['X-Datadog-Trace-Id']);
         // parent is: curl_exec, used under the hood
 
-        if (Versions::phpVersionMatches('5.4')) {
+        if (Util\dd_util_php_version_matches('5.4')) {
             // in 5.4 curl_exec is not included in the trace due to being run through `call_func_array`
             $this->assertSame($traces[0][1]['span_id'], (int) $found['headers']['X-Datadog-Parent-Id']);
         } else {

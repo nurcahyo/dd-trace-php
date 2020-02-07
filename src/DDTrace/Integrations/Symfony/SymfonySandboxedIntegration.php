@@ -2,6 +2,7 @@
 
 namespace DDTrace\Integrations\Symfony;
 
+use Datadog\Trace\Util;
 use DDTrace\Configuration;
 use DDTrace\Contracts\Span;
 use DDTrace\GlobalTracer;
@@ -10,7 +11,6 @@ use DDTrace\Integrations\SandboxedIntegration;
 use DDTrace\SpanData;
 use DDTrace\Tag;
 use DDTrace\Type;
-use DDTrace\Util\Versions;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\KernelEvents;
 
@@ -54,7 +54,7 @@ class SymfonySandboxedIntegration extends SandboxedIntegration
 
                 if (
                     defined('\Symfony\Component\HttpKernel\Kernel::VERSION')
-                        && Versions::versionMatches('2', \Symfony\Component\HttpKernel\Kernel::VERSION)
+                        && Util\dd_util_version_matches('2', \Symfony\Component\HttpKernel\Kernel::VERSION)
                 ) {
                     $isSymfony2 = true;
                     return false;

@@ -2,11 +2,11 @@
 
 namespace DDTrace\Tests\Integration;
 
+use Datadog\Trace\Util;
 use DDTrace\Tests\Unit\BaseTestCase;
 use DDTrace\Tracer;
 use DDTrace\Tests\Common\TracerTestTrait;
 use DDTrace\SpanData;
-use DDTrace\Util\Versions;
 
 final class TracerTest extends BaseTestCase
 {
@@ -44,7 +44,7 @@ final class TracerTest extends BaseTestCase
 
     public function testGlobalTagsArePresentOnInternalSpansByFlushTime()
     {
-        if (Versions::phpVersionMatches('5.4')) {
+        if (Util\dd_util_php_version_matches('5.4')) {
             $this->markTestSkipped('Internal spans are not enabled yet on PHP 5.4');
         }
         \dd_trace_method('DDTrace\Tests\Integration\TracerTest', 'dummyMethod', function (SpanData $span) {

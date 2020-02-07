@@ -2,11 +2,11 @@
 
 namespace DDTrace\Integrations\Mongo;
 
+use Datadog\Trace\Util;
 use DDTrace\Contracts\Span;
 use DDTrace\Tag;
 use DDTrace\Obfuscation;
 use DDTrace\Integrations\Integration;
-use DDTrace\Util\Versions;
 
 final class MongoClientIntegration extends Integration
 {
@@ -22,7 +22,7 @@ final class MongoClientIntegration extends Integration
 
     protected static function loadIntegration()
     {
-        if (Versions::phpVersionMatches('5.4')) {
+        if (Util\dd_util_php_version_matches('5.4')) {
             return;
         }
 

@@ -2,11 +2,11 @@
 
 namespace DDTrace\Integrations\Mysqli;
 
+use Datadog\Trace\Util;
 use DDTrace\Integrations\Integration;
 use DDTrace\Integrations\SandboxedIntegration;
 use DDTrace\SpanData;
 use DDTrace\Type;
-use DDTrace\Util\ObjectKVStore;
 
 class MysqliSandboxedIntegration extends SandboxedIntegration
 {
@@ -109,7 +109,8 @@ class MysqliSandboxedIntegration extends SandboxedIntegration
 
             MysqliCommon::storeQuery($mysqli, $query);
             MysqliCommon::storeQuery($result, $query);
-            ObjectKVStore::put($result, 'host_info', MysqliCommon::extractHostInfo($mysqli));
+            Util\dd_util_obj_kvstore_put($result, 'host_info', MysqliCommon::extractHostInfo($mysqli));
+            Util\dd_util_obj_kvstore_put($result, 'host_info', MysqliCommon::extractHostInfo($mysqli));
         });
 
         dd_trace_function('mysqli_prepare', function (SpanData $span, $args, $returnedStatement) use ($integration) {
@@ -123,7 +124,7 @@ class MysqliSandboxedIntegration extends SandboxedIntegration
 
             $host_info = MysqliCommon::extractHostInfo($mysqli);
             MysqliCommon::storeQuery($returnedStatement, $query);
-            ObjectKVStore::put($returnedStatement, 'host_info', $host_info);
+            Util\dd_util_obj_kvstore_put($returnedStatement, 'host_info', $host_info);
         });
 
         dd_trace_function('mysqli_commit', function (SpanData $span, $args) use ($integration) {
@@ -155,7 +156,7 @@ class MysqliSandboxedIntegration extends SandboxedIntegration
             list($statement) = $args;
             $resource = MysqliCommon::retrieveQuery($statement, 'mysqli_stmt_get_result');
             MysqliCommon::storeQuery($result, $resource);
-            ObjectKVStore::propagate($statement, $result, 'host_info');
+            Util\dd_util_obj_kvstore_propagate($statement, $result, 'host_info');
 
             return false;
         });
@@ -170,10 +171,10 @@ class MysqliSandboxedIntegration extends SandboxedIntegration
             $integration->addTraceAnalyticsIfEnabled($span);
             $integration->setConnectionInfo($span, $this);
             MysqliCommon::storeQuery($this, $query);
-            ObjectKVStore::put($result, 'query', $query);
+            Util\dd_util_obj_kvstore_put($result, 'query', $query);
             $host_info = MysqliCommon::extractHostInfo($this);
-            ObjectKVStore::put($result, 'host_info', $host_info);
-            ObjectKVStore::put($result, 'query', $query);
+            Util\dd_util_obj_kvstore_put($result, 'host_info', $host_info);
+            Util\dd_util_obj_kvstore_put($result, 'query', $query);
         });
 
         dd_trace_method('mysqli', 'prepare', function (SpanData $span, $args, $returnedStatement) use ($integration) {
@@ -185,7 +186,7 @@ class MysqliSandboxedIntegration extends SandboxedIntegration
             $integration->setDefaultAttributes($span, 'mysqli.prepare', $query);
             $integration->setConnectionInfo($span, $this);
             $host_info = MysqliCommon::extractHostInfo($this);
-            ObjectKVStore::put($returnedStatement, 'host_info', $host_info);
+            Util\dd_util_obj_kvstore_put($returnedStatement, 'host_info', $host_info);
             MysqliCommon::storeQuery($returnedStatement, $query);
         });
 
@@ -222,8 +223,8 @@ class MysqliSandboxedIntegration extends SandboxedIntegration
             $integration->setDefaultAttributes($span, 'mysqli_stmt.get_result', $resource);
             $integration->setConnectionInfo($span, $this);
 
-            ObjectKVStore::propagate($this, $result, 'host_info');
-            ObjectKVStore::put($result, 'query', $resource);
+            Util\dd_util_obj_kvstore_propagate($this, $result, 'host_info');
+            Util\dd_util_obj_kvstore_put($result, 'query', $resource);
         });
 
         return Integration::LOADED;

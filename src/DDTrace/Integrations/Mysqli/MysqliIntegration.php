@@ -2,10 +2,10 @@
 
 namespace DDTrace\Integrations\Mysqli;
 
+use Datadog\Trace\Util;
 use DDTrace\Integrations\Integration;
 use DDTrace\Tag;
 use DDTrace\Type;
-use DDTrace\Util\ObjectKVStore;
 use DDTrace\GlobalTracer;
 
 class MysqliIntegration extends Integration
@@ -217,7 +217,7 @@ class MysqliIntegration extends Integration
 
             $result = dd_trace_forward_call();
             MysqliCommon::storeQuery($result, $query);
-            ObjectKVStore::put($result, 'host_info', MysqliCommon::extractHostInfo($mysqli));
+            Util\dd_util_obj_kvstore_put($result, 'host_info', MysqliCommon::extractHostInfo($mysqli));
 
             $scope->close();
 
@@ -239,7 +239,7 @@ class MysqliIntegration extends Integration
             $statement = dd_trace_forward_call();
             MysqliCommon::storeQuery($statement, $query);
             $host_info = MysqliCommon::extractHostInfo($mysqli);
-            ObjectKVStore::put($statement, 'host_info', $host_info);
+            Util\dd_util_obj_kvstore_put($statement, 'host_info', $host_info);
 
             $scope->close();
 
@@ -300,7 +300,7 @@ class MysqliIntegration extends Integration
             $result = dd_trace_forward_call();
 
             MysqliCommon::storeQuery($result, $resource);
-            ObjectKVStore::propagate($stmt, $result, 'host_info');
+            Util\dd_util_obj_kvstore_propagate($stmt, $result, 'host_info');
 
             return $result;
         });
@@ -322,8 +322,8 @@ class MysqliIntegration extends Integration
 
             $afterResult = function ($result) use ($query) {
                 $host_info = MysqliCommon::extractHostInfo($this);
-                ObjectKVStore::put($result, 'host_info', $host_info);
-                ObjectKVStore::put($result, 'query', $query);
+                Util\dd_util_obj_kvstore_put($result, 'host_info', $host_info);
+                Util\dd_util_obj_kvstore_put($result, 'query', $query);
             };
             return include __DIR__ . '/../../try_catch_finally.php';
         });
@@ -341,7 +341,7 @@ class MysqliIntegration extends Integration
             MysqliIntegration::setConnectionInfo($span, $this);
             $afterResult = function ($statement) use ($query) {
                 $host_info = MysqliCommon::extractHostInfo($this);
-                ObjectKVStore::put($statement, 'host_info', $host_info);
+                Util\dd_util_obj_kvstore_put($statement, 'host_info', $host_info);
                 MysqliCommon::storeQuery($statement, $query);
             };
             return include __DIR__ . '/../../try_catch_finally.php';
@@ -391,8 +391,8 @@ class MysqliIntegration extends Integration
             $resource = MysqliCommon::retrieveQuery($this, 'mysqli_stmt.get_result');
             $scope = MysqliIntegration::initScope('mysqli_stmt.get_result', $resource);
             $afterResult = function ($result) use ($resource) {
-                ObjectKVStore::propagate($this, $result, 'host_info');
-                ObjectKVStore::put($result, 'query', $resource);
+                Util\dd_util_obj_kvstore_propagate($this, $result, 'host_info');
+                Util\dd_util_obj_kvstore_put($result, 'query', $resource);
             };
             return include __DIR__ . '/../../try_catch_finally.php';
         });

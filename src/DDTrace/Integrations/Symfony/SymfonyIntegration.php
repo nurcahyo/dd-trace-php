@@ -2,9 +2,9 @@
 
 namespace DDTrace\Integrations\Symfony;
 
+use Datadog\Trace\Util;
 use DDTrace\GlobalTracer;
 use DDTrace\Integrations\Integration;
-use DDTrace\Util\Versions;
 
 class SymfonyIntegration extends Integration
 {
@@ -68,14 +68,14 @@ class SymfonyIntegration extends Integration
 
                 $bundle = null;
                 if (
-                    Versions::versionMatches('3.4', $version)
-                    || Versions::versionMatches('3.3', $version)
-                    || Versions::versionMatches('3.0', $version)
+                    Util\dd_util_version_matches('3.4', $version)
+                    || Util\dd_util_version_matches('3.3', $version)
+                    || Util\dd_util_version_matches('3.0', $version)
                 ) {
                     $bundle = new \DDTrace\Integrations\Symfony\V3\SymfonyBundle();
-                } elseif (Versions::versionMatches('4', $version)) {
+                } elseif (Util\dd_util_version_matches('4', $version)) {
                     $bundle = new \DDTrace\Integrations\Symfony\V4\SymfonyBundle();
-                } elseif (Versions::versionMatches('2', $version)) {
+                } elseif (Util\dd_util_version_matches('2', $version)) {
                     // We do not register the bundle as we do not fully support Symfony 2.8 yet. And probably we won't
                     // use bundles in the future anymore
                     $bundle = null;

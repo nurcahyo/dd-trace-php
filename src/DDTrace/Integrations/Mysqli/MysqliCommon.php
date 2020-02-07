@@ -2,7 +2,7 @@
 
 namespace DDTrace\Integrations\Mysqli;
 
-use DDTrace\Util\ObjectKVStore;
+use Datadog\Trace\Util;
 
 class MysqliCommon
 {
@@ -51,7 +51,7 @@ class MysqliCommon
      */
     public static function storeQuery($instance, $query)
     {
-        ObjectKVStore::put($instance, 'query', $query);
+        Util\dd_util_obj_kvstore_put($instance, 'query', $query);
     }
 
     /**
@@ -63,6 +63,6 @@ class MysqliCommon
      */
     public static function retrieveQuery($instance, $fallbackValue)
     {
-        return ObjectKVStore::get($instance, 'query', $fallbackValue);
+        return Util\dd_util_obj_kvstore_get($instance, 'query', $fallbackValue);
     }
 }

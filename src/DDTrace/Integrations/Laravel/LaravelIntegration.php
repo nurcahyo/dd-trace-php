@@ -2,9 +2,9 @@
 
 namespace DDTrace\Integrations\Laravel;
 
+use Datadog\Trace\Util;
 use DDTrace\Integrations\Integration;
 use DDTrace\Integrations\Laravel\V5\LaravelIntegrationLoader;
-use DDTrace\Util\Versions;
 
 /**
  * The base Laravel integration which delegates loading to the appropriate integration version.
@@ -66,9 +66,9 @@ class LaravelIntegration extends Integration
         dd_trace('Illuminate\Foundation\Application', '__construct', function () {
 
             $version = \Illuminate\Foundation\Application::VERSION;
-            if (Versions::versionMatches("4.2", $version)) {
+            if (Util\dd_util_version_matches("4.2", $version)) {
                 \DDTrace\Integrations\Laravel\V4\LaravelIntegration::load();
-            } elseif (Versions::versionMatches("5", $version)) {
+            } elseif (Util\dd_util_version_matches("5", $version)) {
                 $loader = new LaravelIntegrationLoader();
                 $loader->load();
             }

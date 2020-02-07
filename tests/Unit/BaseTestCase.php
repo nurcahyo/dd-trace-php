@@ -2,9 +2,9 @@
 
 namespace DDTrace\Tests\Unit;
 
+use Datadog\Trace\Util;
 use DDTrace\Log\Logger;
 use DDTrace\Tests\DebugLogger;
-use DDTrace\Util\Versions;
 use PHPUnit\Framework;
 
 abstract class BaseTestCase extends Framework\TestCase
@@ -18,7 +18,7 @@ abstract class BaseTestCase extends Framework\TestCase
 
     protected function matchesPhpVersion($version)
     {
-        return Versions::phpVersionMatches($version);
+        return Util\dd_util_php_version_matches($version);
     }
 
     /**

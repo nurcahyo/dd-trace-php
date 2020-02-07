@@ -2,6 +2,7 @@
 
 namespace DDTrace\Tests\Integrations\Curl;
 
+use Datadog\Trace\Util;
 use DDTrace\Configuration;
 use DDTrace\Format;
 use DDTrace\Integrations\IntegrationsLoader;
@@ -9,7 +10,6 @@ use DDTrace\Sampling\PrioritySampling;
 use DDTrace\Tests\Common\IntegrationTestCase;
 use DDTrace\Tests\Common\SpanAssertion;
 use DDTrace\Tracer;
-use DDTrace\Util\ArrayKVStore;
 use DDTrace\GlobalTracer;
 
 class PrivateCallbackRequest
@@ -249,9 +249,9 @@ final class CurlIntegrationTest extends IntegrationTestCase
     {
         $ch = curl_init(self::URL . '/status/200');
         curl_setopt($ch, CURLOPT_HTTPHEADER, []);
-        $this->assertNotSame('default', ArrayKVStore::getForResource($ch, Format::CURL_HTTP_HEADERS, 'default'));
+        $this->assertNotSame('default', util\dd_util_array_kvstore_get_for_resource($ch, Format::CURL_HTTP_HEADERS, 'default'));
         curl_close($ch);
-        $this->assertSame('default', ArrayKVStore::getForResource($ch, Format::CURL_HTTP_HEADERS, 'default'));
+        $this->assertSame('default', Util\dd_util_array_kvstore_get_for_resource($ch, Format::CURL_HTTP_HEADERS, 'default'));
     }
 
     public function testDistributedTracingIsPropagated()

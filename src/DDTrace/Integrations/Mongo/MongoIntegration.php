@@ -2,11 +2,11 @@
 
 namespace DDTrace\Integrations\Mongo;
 
+use Datadog\Trace\Util;
 use DDTrace\Contracts\Span;
 use DDTrace\Integrations\Integration;
 use DDTrace\Tag;
 use DDTrace\Type;
-use DDTrace\Util\Versions;
 
 final class MongoIntegration extends Integration
 {
@@ -38,7 +38,7 @@ final class MongoIntegration extends Integration
 
     public static function load()
     {
-        if (!extension_loaded('mongo') || Versions::phpVersionMatches('5.4')) {
+        if (!extension_loaded('mongo') || Util\dd_util_php_version_matches('5.4')) {
             // Mongodb integration is provided through an extension and not through a class loader.
             return Integration::NOT_AVAILABLE;
         }

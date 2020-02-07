@@ -2,8 +2,8 @@
 
 namespace DDTrace\Integrations\Yii;
 
+use Datadog\Trace\Util;
 use DDTrace\Integrations\SandboxedIntegration;
-use DDTrace\Util\Versions;
 
 class YiiSandboxedIntegration extends SandboxedIntegration
 {
@@ -54,7 +54,7 @@ class YiiSandboxedIntegration extends SandboxedIntegration
 
         // This happens somewhat early in the setup, though there may be a better candidate
         \dd_trace_method('yii\di\Container', '__construct', function () use ($integration) {
-            if (Versions::versionMatches('2.0', \Yii::getVersion())) {
+            if (Util\dd_util_version_matches('2.0', \Yii::getVersion())) {
                 $loader = new V2\YiiIntegrationLoader();
                 $loader->load($integration);
             }

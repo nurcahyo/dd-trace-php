@@ -2,6 +2,7 @@
 
 namespace DDTrace\Integrations\Curl;
 
+use Datadog\Trace\Util;
 use DDTrace\Configuration;
 use DDTrace\Format;
 use DDTrace\Http\Urls;
@@ -9,7 +10,6 @@ use DDTrace\Integrations\Integration;
 use DDTrace\Span;
 use DDTrace\Tag;
 use DDTrace\Type;
-use DDTrace\Util\ArrayKVStore;
 use DDTrace\GlobalTracer;
 
 /**
@@ -137,7 +137,7 @@ class CurlIntegration extends Integration
                     && is_array($value)
                 ) {
                     // Storing data to be used during exec as it cannot be retrieved at then.
-                    ArrayKVStore::putForResource($ch, Format::CURL_HTTP_HEADERS, $value);
+                    Util\dd_util_array_kvstore_put_for_resource($ch, Format::CURL_HTTP_HEADERS, $value);
                 }
 
                 return dd_trace_forward_call();
@@ -154,7 +154,10 @@ class CurlIntegration extends Integration
                     && array_key_exists(CURLOPT_HTTPHEADER, $options)
                 ) {
                     // Storing data to be used during exec as it cannot be retrieved at then.
-                    ArrayKVStore::putForResource($ch, Format::CURL_HTTP_HEADERS, $options[CURLOPT_HTTPHEADER]);
+                    Util\dd_util_array_kvstore_put_for_resource(
+                        $ch,
+                        Format::CURL_HTTP_HEADERS, $options[CURLOPT_HTTPHEADER]
+                    );
                 }
 
                 return dd_trace_forward_call();
@@ -168,9 +171,9 @@ class CurlIntegration extends Integration
                 /* The store needs to copy the CURLOPT_HTTPHEADER value to the new handle;
                  * see https://github.com/DataDog/dd-trace-php/issues/502 */
                 if (\is_resource($ch2) && $globalConfig->isDistributedTracingEnabled()) {
-                    $httpHeaders = ArrayKVStore::getForResource($ch1, Format::CURL_HTTP_HEADERS, []);
+                    $httpHeaders = Util\dd_util_array_kvstore_get_for_resource($ch1, Format::CURL_HTTP_HEADERS, []);
                     if (\is_array($httpHeaders)) {
-                        ArrayKVStore::putForResource($ch2, Format::CURL_HTTP_HEADERS, $httpHeaders);
+                        Util\dd_util_array_kvstore_put_for_resource($ch2, Format::CURL_HTTP_HEADERS, $httpHeaders);
                     }
                 }
                 return $ch2;
@@ -180,7 +183,7 @@ class CurlIntegration extends Integration
         dd_trace('curl_close', [
             'instrument_when_limited' => 1,
             'innerhook' => function ($ch) {
-                ArrayKVStore::deleteResource($ch);
+                util\dd_util_array_kvstore_delete_resource($ch);
                 return dd_trace_forward_call();
             }
         ]);
@@ -197,7 +200,7 @@ class CurlIntegration extends Integration
             return;
         }
 
-        $httpHeaders = ArrayKVStore::getForResource($ch, Format::CURL_HTTP_HEADERS, []);
+        $httpHeaders = Util\dd_util_array_kvstore_get_for_resource($ch, Format::CURL_HTTP_HEADERS, []);
         if (is_array($httpHeaders)) {
             $tracer = GlobalTracer::get();
             $activeSpan = $tracer->getActiveSpan();

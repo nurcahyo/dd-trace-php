@@ -2,8 +2,8 @@
 
 namespace DDTrace\Tests\Common;
 
+use Datadog\Trace\Util;
 use DDTrace\Integrations\IntegrationsLoader;
-use DDTrace\Util\Versions;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -42,7 +42,7 @@ abstract class IntegrationTestCase extends TestCase
     {
         $this->errorReportingBefore = error_reporting();
         parent::setUp();
-        if (Versions::phpVersionMatches('5.4') && self::isSandboxed()) {
+        if (Util\dd_util_php_version_matches('5.4') && self::isSandboxed()) {
             $this->markTestSkipped('Sandboxed tests are skipped on PHP 5.4.');
         }
     }
