@@ -6,6 +6,7 @@ use DDTrace\Tests\Unit\BaseTestCase;
 use DDTrace\Util\ArrayKVStore;
 use DDTrace\Util\ContainerInfo;
 use DDTrace\Util\ObjectKVStore;
+use DDTrace\Util\Runtime;
 use DDTrace\Util\Versions;
 
 final class ComposerOnlyClassesTest extends BaseTestCase
@@ -32,11 +33,11 @@ final class ComposerOnlyClassesTest extends BaseTestCase
         // ObjectKVStore
         $this->assertNull(ObjectKVStore::get(new \stdClass(), null));
 
-        // ObjectKVStore
-        $this->assertNull(ObjectKVStore::get(new \stdClass(), null));
-
         // Container info
         new ContainerInfo();
+
+        // Runtime
+        Runtime::isAutoloaderRegistered('class', 'method');
 
         // Versions
         Versions::phpVersionMatches('7.4');

@@ -25,7 +25,6 @@ require __DIR__ . '/../src/DDTrace/Transport/Http.php';
 require __DIR__ . '/../src/DDTrace/Transport/Stream.php';
 require __DIR__ . '/../src/DDTrace/Type.php';
 require __DIR__ . '/../src/DDTrace/Encoder.php';
-require __DIR__ . '/../src/DDTrace/Util/Runtime.php';
 require __DIR__ . '/../src/DDTrace/Util/TryCatchFinally.php';
 require __DIR__ . '/../src/DDTrace/Util/CodeTracer.php';
 require __DIR__ . '/../src/DDTrace/Processing/TraceAnalyticsProcessor.php';

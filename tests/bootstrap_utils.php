@@ -25,6 +25,7 @@ function missing_ddtrace_class_fatal_autoloader($class)
         'DDTrace\Util\ArrayKVStore',
         'DDTrace\Util\ContainerInfo',
         'DDTrace\Util\ObjectKVStore',
+        'DDTrace\Util\Runtime',
         'DDTrace\Util\Versions',
     ];
     foreach ($movedToFunctionalApi as $pattern) {

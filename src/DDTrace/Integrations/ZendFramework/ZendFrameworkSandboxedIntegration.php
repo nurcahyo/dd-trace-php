@@ -2,13 +2,13 @@
 
 namespace DDTrace\Integrations\ZendFramework;
 
+use Datadog\Trace\Util;
 use DDTrace\Configuration;
 use DDTrace\GlobalTracer;
 use DDTrace\Tag;
 use DDTrace\Integrations\Integration;
 use DDTrace\Integrations\SandboxedIntegration;
 use DDTrace\SpanData;
-use DDTrace\Util\Runtime;
 use Zend_Controller_Front;
 
 /**
@@ -47,7 +47,7 @@ class ZendFrameworkSandboxedIntegration extends SandboxedIntegration
 
         // Some frameworks, e.g. Yii registers autoloaders that fails with non-psr4 classes. For this reason the
         // Zend framework integration is not compatible with some of them
-        if (Runtime::isAutoloaderRegistered('YiiBase', 'autoload')) {
+        if (Util\dd_util_is_autoloader_registered('YiiBase', 'autoload')) {
             return self::NOT_AVAILABLE;
         }
 
