@@ -119,11 +119,7 @@ class ObjectKVStore
      */
     public static function put($instance, $key, $value)
     {
-        if (self::isIncompleteInfo($instance, $key)) {
-            return;
-        }
-        $scopedKey = self::getScopedKeyName($key);
-        $instance->$scopedKey = $value;
+        Util\dd_util_obj_kvstore_put($instance, $key, $value);
     }
 
     /**
@@ -136,11 +132,7 @@ class ObjectKVStore
      */
     public static function get($instance, $key, $default = null)
     {
-        if (self::isIncompleteInfo($instance, $key)) {
-            return $default;
-        }
-        $scopedKey = self::getScopedKeyName($key);
-        return property_exists($instance, $scopedKey) ? $instance->$scopedKey : $default;
+        return Util\dd_util_obj_kvstore_get($instance, $key, $default);
     }
 
     /**
@@ -152,33 +144,6 @@ class ObjectKVStore
      */
     public static function propagate($instance_source, $instance_destination, $key)
     {
-        self::put($instance_destination, $key, self::get($instance_source, $key));
-    }
-
-    /**
-     * Given a human-friendly key name, return a modified version of the key which is scoped into a Datadog namespace.
-     *
-     * @param string $key
-     * @return string
-     */
-    private static function getScopedKeyName($key)
-    {
-        return self::$KEY_PREFIX . $key;
-    }
-
-    /**
-     * Tells whether or not a set of info is enough to be used as a store.
-     *
-     * @param mixed $instance
-     * @param string $key
-     * @return bool
-     */
-    private static function isIncompleteInfo($instance, $key)
-    {
-        return
-            empty($instance)
-            || !is_object($instance)
-            || empty($key)
-            || !is_string($key);
+        Util\dd_util_obj_kvstore_propagate($instance_source, $instance_destination, $key);
     }
 }

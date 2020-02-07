@@ -205,6 +205,78 @@ function _get_resource_key($resource)
 }
 
 /**
+ * Put or replaces a key with a specific value.
+ *
+ * @param mixed $instance
+ * @param string $key
+ * @param mixed $value
+ */
+function dd_util_obj_kvstore_put($instance, $key, $value)
+{
+    if (_is_incomplete_obj_info($instance, $key)) {
+        return;
+    }
+    $scopedKey = _get_scoped_obj_key($key);
+    $instance->$scopedKey = $value;
+}
+
+/**
+ * Copy a value from a source instance to a destination instance.
+ *
+ * @param mixed $instance_source
+ * @param mixed $instance_destination
+ * @param string $key
+ */
+function dd_util_obj_kvstore_propagate($instance_source, $instance_destination, $key)
+{
+    dd_util_obj_kvstore_put($instance_destination, $key, dd_util_obj_kvstore_get($instance_source, $key));
+}
+
+/**
+ * Extract a key's value from an instance. If the key is not set => fallbacks to default.
+ *
+ * @param mixed $instance
+ * @param string $key
+ * @param mixed $default
+ * @return mixed|null
+ */
+function dd_util_obj_kvstore_get($instance, $key, $default = null)
+{
+    if (_is_incomplete_obj_info($instance, $key)) {
+        return $default;
+    }
+    $scopedKey = _get_scoped_obj_key($key);
+    return property_exists($instance, $scopedKey) ? $instance->$scopedKey : $default;
+}
+
+/**
+ * Tells whether or not a set of info is enough to be used as a store.
+ *
+ * @param mixed $instance
+ * @param string $key
+ * @return bool
+ */
+function _is_incomplete_obj_info($instance, $key)
+{
+    return
+        empty($instance)
+        || !is_object($instance)
+        || empty($key)
+        || !is_string($key);
+}
+
+/**
+ * Given a human-friendly key name, return a modified version of the key which is scoped into a Datadog namespace.
+ *
+ * @param string $key
+ * @return string
+ */
+function _get_scoped_obj_key($key)
+{
+    return "__dd_store_$key";
+}
+
+/**
  * Converts a string '1.2.3' to an array of integers [1, 2, 3]
  *
  * @param string $versionAsString

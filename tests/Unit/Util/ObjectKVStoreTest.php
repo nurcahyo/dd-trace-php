@@ -2,6 +2,7 @@
 
 namespace DDTrace\Tests\Unit\Util;
 
+use Datadog\Trace\Util;
 use DDTrace\Util\ObjectKVStore;
 use PHPUnit\Framework\TestCase;
 
@@ -12,6 +13,9 @@ final class ObjectKVStoreTest extends TestCase
         $instance = new \stdClass();
         ObjectKVStore::put($instance, 'key', 'value');
         $this->assertSame('value', ObjectKVStore::get($instance, 'key'));
+
+        Util\dd_util_obj_kvstore_put($instance, 'keyA', 'valueA');
+        $this->assertSame('valueA', ObjectKVStore::get($instance, 'keyA'));
     }
 
     public function testPutGetDifferentKeys()
@@ -21,6 +25,11 @@ final class ObjectKVStoreTest extends TestCase
         ObjectKVStore::put($instance, 'key2', 'value2');
         $this->assertSame('value1', ObjectKVStore::get($instance, 'key1'));
         $this->assertSame('value2', ObjectKVStore::get($instance, 'key2'));
+
+        Util\dd_util_obj_kvstore_put($instance, 'keyA', 'valueA');
+        Util\dd_util_obj_kvstore_put($instance, 'keyB', 'valueB');
+        $this->assertSame('valueA', ObjectKVStore::get($instance, 'keyA'));
+        $this->assertSame('valueB', ObjectKVStore::get($instance, 'keyB'));
     }
 
     public function testPutGetDifferentInstancesSameKey()
@@ -31,17 +40,24 @@ final class ObjectKVStoreTest extends TestCase
         ObjectKVStore::put($instance2, 'key', 'value2');
         $this->assertSame('value1', ObjectKVStore::get($instance1, 'key'));
         $this->assertSame('value2', ObjectKVStore::get($instance2, 'key'));
+
+        Util\dd_util_obj_kvstore_put($instance1, 'keyA', 'valueA');
+        Util\dd_util_obj_kvstore_put($instance2, 'keyA', 'valueB');
+        $this->assertSame('valueA', ObjectKVStore::get($instance1, 'keyA'));
+        $this->assertSame('valueB', ObjectKVStore::get($instance2, 'keyA'));
     }
 
     public function testPutNullInstanceNoException()
     {
         ObjectKVStore::put(null, 'key', 'value');
+        Util\dd_util_obj_kvstore_put(null, 'keyA', 'valueA');
         $this->addToAssertionCount(1);
     }
 
     public function testPutNonObjectInstanceNoException()
     {
         ObjectKVStore::put('instance', 'key', 'value');
+        Util\dd_util_obj_kvstore_put('instance', 'keyA', 'valueA');
         $this->addToAssertionCount(1);
     }
 
@@ -49,6 +65,7 @@ final class ObjectKVStoreTest extends TestCase
     {
         $instance = new \stdClass();
         ObjectKVStore::put($instance, null, 'value');
+        Util\dd_util_obj_kvstore_put($instance, null, 'value');
         $this->addToAssertionCount(1);
     }
 
@@ -56,6 +73,7 @@ final class ObjectKVStoreTest extends TestCase
     {
         $instance = new \stdClass();
         ObjectKVStore::put($instance, '', 'value');
+        Util\dd_util_obj_kvstore_put($instance, '', 'value');
         $this->addToAssertionCount(1);
     }
 
@@ -64,63 +82,74 @@ final class ObjectKVStoreTest extends TestCase
         $instance = new \stdClass();
         $instance->existing = 'existing';
         ObjectKVStore::put($instance, 'key', 'value');
+        Util\dd_util_obj_kvstore_put($instance, 'keyA', 'valueA');
         $this->assertSame('existing', $instance->existing);
     }
 
     public function testGetNullInstance()
     {
         $this->assertNull(ObjectKVStore::get(null, 'key'));
+        $this->assertNull(Util\dd_util_obj_kvstore_get(null, 'key'));
     }
 
     public function testGetNullInstanceDefaultValue()
     {
         $this->assertSame('value', ObjectKVStore::get(null, 'key', 'value'));
+        $this->assertSame('value', Util\dd_util_obj_kvstore_get(null, 'key', 'value'));
     }
 
     public function testGetNonObjectInstance()
     {
         $this->assertNull(ObjectKVStore::get('instance', 'key'));
+        $this->assertNull(Util\dd_util_obj_kvstore_get('instance', 'key'));
     }
 
     public function testGetNonObjectInstanceInstanceDefaultValue()
     {
         $this->assertSame('value', ObjectKVStore::get('instance', 'key', 'value'));
+        $this->assertSame('value', Util\dd_util_obj_kvstore_get('instance', 'key', 'value'));
     }
 
     public function testGetNullKey()
     {
         $instance = new \stdClass();
         $this->assertNull(ObjectKVStore::get($instance, null));
+        $this->assertNull(Util\dd_util_obj_kvstore_get($instance, null));
     }
 
     public function testGetEmptyKey()
     {
         $instance = new \stdClass();
         $this->assertNull(ObjectKVStore::get($instance, ''));
+        $this->assertNull(Util\dd_util_obj_kvstore_get($instance, ''));
     }
 
     public function testGetNonStringKey()
     {
         $instance = new \stdClass();
         $this->assertNull(ObjectKVStore::get($instance, 1));
+        $this->assertNull(Util\dd_util_obj_kvstore_get($instance, 1));
     }
 
     public function testGetNullKeyDefaultValue()
     {
         $instance = new \stdClass();
         $this->assertSame('value', ObjectKVStore::get($instance, null, 'value'));
+        $this->assertSame('value', Util\dd_util_obj_kvstore_get($instance, null, 'value'));
     }
 
     public function testGetEmptyKeyDefaultValue()
     {
         $instance = new \stdClass();
         $this->assertSame('value', ObjectKVStore::get($instance, '', 'value'));
+        $this->assertSame('value', Util\dd_util_obj_kvstore_get($instance, '', 'value'));
     }
 
     public function testGetNonStringKeyDefaultValue()
     {
         $instance = new \stdClass();
         $this->assertSame('value', ObjectKVStore::get($instance, 1, 'value'));
+        $this->assertSame('value', Util\dd_util_obj_kvstore_get($instance, 1, 'value'));
     }
 
     public function testPropagate()
@@ -129,14 +158,21 @@ final class ObjectKVStoreTest extends TestCase
         $destination = new \stdClass();
         ObjectKVStore::put($source, 'key', 'value');
         ObjectKVStore::propagate($source, $destination, 'key');
+        Util\dd_util_obj_kvstore_put($source, 'keyA', 'valueA');
+        Util\dd_util_obj_kvstore_propagate($source, $destination, 'keyA');
+
         $this->assertSame('value', ObjectKVStore::get($destination, 'key'));
+        $this->assertSame('valueA', Util\dd_util_obj_kvstore_get($destination, 'keyA'));
     }
 
     public function testKeyIsScoped()
     {
         $instance = new \stdClass();
         ObjectKVStore::put($instance, 'key', 'value');
+        Util\dd_util_obj_kvstore_put($instance, 'keyA', 'valueA');
         $this->assertFalse(property_exists($instance, 'key'));
+        $this->assertFalse(property_exists($instance, 'keyA'));
         $this->assertTrue(property_exists($instance, '__dd_store_key'));
+        $this->assertTrue(property_exists($instance, '__dd_store_keyA'));
     }
 }
