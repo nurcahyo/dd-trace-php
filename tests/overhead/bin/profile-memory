@@ -1,0 +1,77 @@
+#!/usr/bin/env php
+
+<?php
+
+const REPETITIONS = 1;
+const HOST = 'overhead-nginx';
+const PROFILES = [
+    // 'notracer',
+    'master',
+    'head',
+    // 'release',
+];
+const PORTS = [
+    'notracer' => '8886',
+    'master' => '8887',
+    'head' => '8888',
+    'release' => '8889',
+];
+const CALLGRIND_FILES_ROOT = __DIR__ . '/../callgrind-files';
+const OUTPUT_FILE = __DIR__ . '../callgrind-files/stats.csv';
+
+for ($rep = 0; $rep < REPETITIONS; $rep++) {
+    foreach (PROFILES as $profile) {
+        $url = HOST . ':' . PORTS[$profile];
+        // $cmd = "curl http://$url";
+        // error_log('Cmd: ' . print_r($cmd, 1));
+        // exec($cmd);
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        $output = curl_exec($ch);
+        if (false === $output) {
+            error_log('Curl error: ' . print_r(curl_error($ch), 1));
+        }
+        curl_close($ch);
+    }
+}
+
+$memory = [];
+
+foreach (PROFILES as $profile) {
+    $lines = [];
+    $callgrindFile = CALLGRIND_FILES_ROOT . "/callgrind.$profile";
+    $cmd = "callgrind_annotate --show=Memory --sort=Memory $callgrindFile";
+    exec($cmd, $lines);
+
+    foreach ($lines as $line) {
+        $line = trim($line);
+        list($normalizedMemoryOccupation, $phpFilePath) = explode('  ', $line);
+
+        $normalizedMemoryOccupation = str_replace(',', '', $normalizedMemoryOccupation);
+        $normalizedPhpFilePath = $phpFilePath;
+        $normalizedPhpFilePath = str_replace('/opt/datadog-php/dd-trace-sources/', '', $normalizedPhpFilePath);
+        $normalizedPhpFilePath = str_replace('/dd-trace-php/', '', $normalizedPhpFilePath);
+
+        if (strpos($normalizedPhpFilePath, 'PROGRAM TOTALS') !== false) {
+            $memory['$TOTAL$'][$profile] = floatval($normalizedMemoryOccupation);
+            continue;
+        }
+
+        if (strpos($normalizedPhpFilePath, 'bridge/') !== false
+                || strpos($normalizedPhpFilePath, 'DDTrace') !== false
+                || strpos($normalizedPhpFilePath, 'lib-php/') !== false) {
+            $memory[$normalizedPhpFilePath][$profile] = floatval($normalizedMemoryOccupation);
+        }
+    }
+}
+
+
+error_log('Memory: ' . print_r($memory, 1));
+$csvFile = fopen(OUTPUT_FILE, 'w');
+fputcsv($csvFile, array_merge(['File/Method'], PROFILES));
+fputcsv($csvFile, array_merge(['TOTAL'], $memory['$TOTAL$']));
+foreach (PROFILES as $profile) {
+}
+fclose($csvFile);
+
+
