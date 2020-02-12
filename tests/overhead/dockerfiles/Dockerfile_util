@@ -1,0 +1,15 @@
+FROM ubuntu:18.04
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN apt update \
+    && apt install -y \
+    gdb \
+    php-cli \
+    iputils-ping \
+    less \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /var/www
+
+CMD bash

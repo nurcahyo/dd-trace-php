@@ -235,7 +235,7 @@ services:
       dockerfile: ./tests/overhead/dockerfiles/Dockerfile_72_fpm_Laravel57
       target: notracer
     depends_on:
-      - agent
+      - overhead-agent
     volumes:
       - ./tests/overhead/callgrind-files:/var/www/callgrind-files
 
@@ -247,7 +247,7 @@ services:
       args:
         - DD_TRACE_LIBRARY_VERSION=${DD_TRACE_LIBRARY_VERSION:-0.39.0}
     depends_on:
-      - agent
+      - overhead-agent
     volumes:
       - ./tests/overhead/callgrind-files:/var/www/callgrind-files
 
@@ -257,7 +257,7 @@ services:
       dockerfile: ./tests/overhead/dockerfiles/Dockerfile_72_fpm_Laravel57
       target: master
     depends_on:
-      - agent
+      - overhead-agent
     volumes:
       - ./tests/overhead/callgrind-files:/var/www/callgrind-files
 
@@ -267,10 +267,19 @@ services:
       dockerfile: ./tests/overhead/dockerfiles/Dockerfile_72_fpm_Laravel57
       target: head
     depends_on:
-      - agent
+      - overhead-agent
     volumes:
       - ./tests/overhead/callgrind-files:/var/www/callgrind-files
       - ./:/dd-trace-php
+
+  overhead-util:
+    build:
+      context: .
+      dockerfile: ./tests/overhead/dockerfiles/Dockerfile_util
+    volumes:
+      - ./tests/overhead/callgrind-files:/var/www/callgrind-files
+    depends_on:
+      - overhead-nginx
 
   overhead-agent:
     image: datadog/agent:latest

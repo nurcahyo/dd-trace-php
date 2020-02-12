@@ -6,9 +6,9 @@ const REPETITIONS = 1;
 const HOST = 'overhead-nginx';
 const PROFILES = [
     // 'notracer',
-    'master',
+    // 'master',
     'head',
-    // 'release',
+    'release',
 ];
 const PORTS = [
     'notracer' => '8886',
@@ -60,7 +60,9 @@ foreach (PROFILES as $profile) {
         if (strpos($normalizedPhpFilePath, 'bridge/') !== false
                 || strpos($normalizedPhpFilePath, 'DDTrace') !== false
                 || strpos($normalizedPhpFilePath, 'lib-php/') !== false) {
-            $memory[$normalizedPhpFilePath][$profile] = floatval($normalizedMemoryOccupation);
+            $memoryValue = floatval($normalizedMemoryOccupation);
+            $memory[$normalizedPhpFilePath][$profile] = $memoryValue;
+            $memory['$TRACER$'][$profile] =+ $memoryValue;
         }
     }
 }
@@ -70,8 +72,7 @@ error_log('Memory: ' . print_r($memory, 1));
 $csvFile = fopen(OUTPUT_FILE, 'w');
 fputcsv($csvFile, array_merge(['File/Method'], PROFILES));
 fputcsv($csvFile, array_merge(['TOTAL'], $memory['$TOTAL$']));
-foreach (PROFILES as $profile) {
-}
+// fputcsv($csvFile, array_merge(['TARCER'], $memory['$TRACER$']));
+// foreach (PROFILES as $profile) {
+// }
 fclose($csvFile);
-
-
