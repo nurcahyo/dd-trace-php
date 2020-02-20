@@ -534,6 +534,25 @@ jobs:
           root: '.'
           paths: ['./extensions']
 
+  compile_extension_alpine:
+    working_directory: ~/datadog
+    parameters:
+      php_version:
+        type: string
+    docker: [ image: "datadog/dd-trace-ci:php-build-extension-<< parameters.php_version >>-alpine" ]
+    environment:
+      CFLAGS: ""
+    steps:
+      - <<: *STEP_ATTACH_WORKSPACE
+      - run: mkdir -p extensions
+      - run:
+          shell: /bin/bash -eo pipefail -l
+          name: Build extension no-debug and debug .so files
+          command: make -C dockerfiles/build-extension << parameters.php_version >>.extension.alpine.build
+      - persist_to_workspace:
+          root: '.'
+          paths: ['./extensions']
+
 
   "Code Checkout":
     working_directory: ~/datadog
@@ -604,41 +623,69 @@ workflows:
           lib_curl_command: yum -y install libcurl-devel
           so_suffix: "20100412"
           requires: [ 'Code Checkout' ]
+      # - compile_extension_alpine:
+      #     name: "Compile PHP 54 Alpine"
+      #     php_version: "5.4"
+      #     requires: [ 'Code Checkout' ]
       - compile_extension:
           requires: [ 'Code Checkout' ]
           name: "Compile PHP 56"
           lib_curl_command: yum -y install libcurl-devel
           docker_image: "datadog/docker-library:ddtrace_centos_6_php_5_6"
           so_suffix: "20131106"
+      - compile_extension_alpine:
+          name: "Compile PHP 56 Alpine"
+          php_version: "5.6"
+          requires: [ 'Code Checkout' ]
       - compile_extension:
           requires: [ 'Code Checkout' ]
           name: "Compile PHP 70"
           lib_curl_command: yum -y install libcurl-devel
           docker_image: "datadog/docker-library:ddtrace_centos_6_php_7_0"
           so_suffix: "20151012"
+      - compile_extension_alpine:
+          name: "Compile PHP 70 Alpine"
+          php_version: "7.0"
+          requires: [ 'Code Checkout' ]
       - compile_extension:
           requires: [ 'Code Checkout' ]
           name: "Compile PHP 71"
           lib_curl_command: yum -y install libcurl-devel
           docker_image: "datadog/docker-library:ddtrace_centos_6_php_7_1"
           so_suffix: "20160303"
+      - compile_extension_alpine:
+          name: "Compile PHP 71 Alpine"
+          php_version: "7.1"
+          requires: [ 'Code Checkout' ]
       - compile_extension:
           requires: [ 'Code Checkout' ]
           name: "Compile PHP 72"
           lib_curl_command: yum -y install libcurl-devel
           docker_image: "datadog/docker-library:ddtrace_centos_6_php_7_2"
           so_suffix: "20170718"
+      - compile_extension_alpine:
+          name: "Compile PHP 72 Alpine"
+          php_version: "7.2"
+          requires: [ 'Code Checkout' ]
       - compile_extension:
           requires: [ 'Code Checkout' ]
           name: "Compile PHP 73"
           lib_curl_command: yum -y install libcurl-devel
           docker_image: "datadog/docker-library:ddtrace_centos_7_php_73"
           so_suffix: "20180731"
+      # - compile_extension_alpine:
+      #     name: "Compile PHP 73 Alpine"
+      #     php_version: "7.3"
+      #     requires: [ 'Code Checkout' ]
       - compile_extension:
           requires: [ 'Code Checkout' ]
           name: "Compile PHP 74"
           docker_image: "datadog/dd-trace-ci:php-7.4-centos-7"
           so_suffix: "20190902"
+      - compile_extension_alpine:
+          name: "Compile PHP 74 Alpine"
+          php_version: "7.4"
+          requires: [ 'Code Checkout' ]
       - compile_extension:
           requires: [ 'Code Checkout' ]
           name: "Compile PHP 56-zts"
