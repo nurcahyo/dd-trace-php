@@ -96,7 +96,7 @@ static void php_ddtrace_init_globals(zend_ddtrace_globals *ng) { memset(ng, 0, s
 /* DDTrace\SpanData */
 zend_class_entry *ddtrace_ce_span_data;
 
-static void register_span_data_ce(TSRMLS_D) {
+static void _dd_register_span_data_ce(TSRMLS_D) {
     zend_class_entry ce_span_data;
     INIT_NS_CLASS_ENTRY(ce_span_data, "DDTrace", "SpanData", NULL);
     ddtrace_ce_span_data = zend_register_internal_class(&ce_span_data TSRMLS_CC);
@@ -109,6 +109,19 @@ static void register_span_data_ce(TSRMLS_D) {
     zend_declare_property_null(ddtrace_ce_span_data, "type", sizeof("type") - 1, ZEND_ACC_PUBLIC TSRMLS_CC);
     zend_declare_property_null(ddtrace_ce_span_data, "meta", sizeof("meta") - 1, ZEND_ACC_PUBLIC TSRMLS_CC);
     zend_declare_property_null(ddtrace_ce_span_data, "metrics", sizeof("metrics") - 1, ZEND_ACC_PUBLIC TSRMLS_CC);
+}
+
+/* DDTrace\FatalError */
+zend_class_entry *ddtrace_ce_fatal_error;
+
+static void _dd_register_fatal_error_ce(TSRMLS_D) {
+    zend_class_entry ce;
+    INIT_NS_CLASS_ENTRY(ce, "DDTrace", "FatalError", NULL);
+#if PHP_VERSION_ID < 70000
+    ddtrace_ce_fatal_error = zend_register_internal_class_ex(&ce, zend_exception_get_default(TSRMLS_C), NULL TSRMLS_CC);
+#else
+    ddtrace_ce_fatal_error = zend_register_internal_class_ex(&ce, zend_ce_exception TSRMLS_CC);
+#endif
 }
 
 static void _dd_disable_if_incompatible_sapi_detected(TSRMLS_D) {
@@ -137,7 +150,8 @@ static PHP_MINIT_FUNCTION(ddtrace) {
     ddtrace_dogstatsd_client_minit(TSRMLS_C);
     ddtrace_signals_minit(TSRMLS_C);
 
-    register_span_data_ce(TSRMLS_C);
+    _dd_register_span_data_ce(TSRMLS_C);
+    _dd_register_fatal_error_ce(TSRMLS_C);
 
     ddtrace_engine_hooks_minit();
 

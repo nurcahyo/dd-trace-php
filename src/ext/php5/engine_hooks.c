@@ -720,3 +720,11 @@ void ddtrace_opcode_mshutdown(void) {
     zend_set_user_opcode_handler(ZEND_DO_FCALL, NULL);
     zend_set_user_opcode_handler(ZEND_DO_FCALL_BY_NAME, NULL);
 }
+
+void ddtrace_error_cb_minit(void) {
+    // TODO
+}
+
+void ddtrace_error_cb_mshutdown(void) {
+    // TODO
+}

@@ -493,7 +493,7 @@ static void _serialize_stack_trace(zval *meta, zval *trace) {
 }
 
 static void _serialize_exception(zval *el, zval *meta, ddtrace_span_t *span) {
-    zval exception, name, msg, stack;
+    zval exception, name, msg, code, stack;
     if (!span->exception) {
         return;
     }
@@ -505,7 +505,27 @@ static void _serialize_exception(zval *el, zval *meta, ddtrace_span_t *span) {
     ZVAL_STR(&name, Z_OBJCE(exception)->name);
     zend_call_method_with_0_params(&exception, Z_OBJCE(exception), NULL, "getmessage", &msg);
 
-    _add_assoc_zval_copy(meta, "error.type", &name);
+    if (instanceof_function(Z_OBJCE(exception), ddtrace_ce_fatal_error)) {
+        zend_call_method_with_0_params(&exception, Z_OBJCE(exception), NULL, "getcode", &code);
+        if (Z_TYPE_INFO(code) == IS_LONG) {
+            switch (Z_LVAL(code)) {
+                case E_ERROR:
+                    add_assoc_string(meta, "error.type", "E_ERROR");
+                    break;
+                case E_CORE_ERROR:
+                    add_assoc_string(meta, "error.type", "E_CORE_ERROR");
+                    break;
+                case E_USER_ERROR:
+                    add_assoc_string(meta, "error.type", "E_USER_ERROR");
+                    break;
+                default:
+                    add_assoc_string(meta, "error.type", "{unknown error}");
+                    break;
+            }
+        }
+    } else {
+        _add_assoc_zval_copy(meta, "error.type", &name);
+    }
     add_assoc_zval(meta, "error.msg", &msg);
 
     /* Note, we use Exception::getTrace() instead of getTraceAsString because
