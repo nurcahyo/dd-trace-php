@@ -152,6 +152,7 @@ println
 $DD_TRACE_PHP_BIN -i > "$EXTENSION_LOGS_DIR/php-info.log"
 
 PHP_VERSION=$($DD_TRACE_PHP_BIN -i | awk '/^PHP[ \t]+API[ \t]+=>/ { print $NF }')
+PHP_MAJOR_MINOR=$($DD_TRACE_PHP_BIN -r 'echo PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION;')
 PHP_CFG_DIR=$($DD_TRACE_PHP_BIN -i | grep 'Scan this dir for additional .ini files =>' | sed -e 's/Scan this dir for additional .ini files =>//g' | head -n 1 | awk '{print $1}')
 
 PHP_THREAD_SAFETY=$($DD_TRACE_PHP_BIN -i | grep 'Thread Safety' | awk '{print $NF}' | grep -i enabled)
@@ -162,7 +163,7 @@ if [[ -n $PHP_THREAD_SAFETY ]]; then
 fi
 
 OS_SPECIFIER=""
-if [ -f "/etc/os-release" ] && $(grep -q 'Alpine Linux' "/etc/os-release"); then
+if [ -f "/etc/os-release" ] && $(grep -q 'Alpine Linux' "/etc/os-release") && [ "${PHP_MAJOR_MINOR}" != "5.4" ]; then
     OS_SPECIFIER="-alpine"
 fi
 
