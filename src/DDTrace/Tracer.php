@@ -180,7 +180,7 @@ final class Tracer implements TracerInterface
             $operationName,
             $context,
             $this->config['service_name'],
-            array_key_exists('resource', $this->config) ? $this->config['resource'] : $operationName,
+            array_key_exists('resource', $this->config) ? $this->config['resource'] : null,
             $options->getStartTime()
         );
 
@@ -349,10 +349,23 @@ final class Tracer implements TracerInterface
     {
         $tracesToBeSent = [];
         $autoFinishSpans = $this->globalConfig->isAutofinishSpansEnabled();
+        $serviceMappings = $this->globalConfig->getServiceMapping();
 
         foreach ($this->traces as $trace) {
             $traceToBeSent = [];
             foreach ($trace as $span) {
+                // If resource is empty, we normalize it the the operation name.
+                if ($span->getResource() === null) {
+                    $span->setResource($span->getOperationName());
+                }
+
+                // Doing service mapping here to avoid an external call. This will be refactored once
+                // we completely move to internal span API.
+                $serviceName = $span->getService();
+                if ($serviceName && !empty($serviceMappings[$serviceName])) {
+                    $span->setTag(Tag::SERVICE_NAME, $serviceMappings[$serviceName], true);
+                }
+
                 if ($span->duration === null) { // is span not finished
                     if (!$autoFinishSpans) {
                         $traceToBeSent = null;
@@ -364,6 +377,7 @@ final class Tracer implements TracerInterface
                 // the internal (hard-coded) processors programmatically.
 
                 $this->traceAnalyticsProcessor->process($span);
+
                 $encodedSpan = SpanEncoder::encode($span);
                 $traceToBeSent[] = $encodedSpan;
             }
@@ -384,11 +398,21 @@ final class Tracer implements TracerInterface
         $globalTags = $this->globalConfig->getGlobalTags();
         if ($globalTags) {
             foreach ($internalSpans as &$internalSpan) {
+                // If resource is empty, we normalize it the the operation name.
+                if (empty($internalSpan['resource'])) {
+                    $internalSpan['resource'] = $internalSpan['name'];
+                }
                 foreach ($globalTags as $globalTagName => $globalTagValue) {
                     if (isset($internalSpan['meta'][$globalTagName])) {
                         continue;
                     }
                     $internalSpan['meta'][$globalTagName] = $globalTagValue;
+                }
+
+                // Doing service mapping here to avoid an external call. This will be refactored once
+                // we completely move to internal span API.
+                if (!empty($internalSpan['service']) && !empty($serviceMappings[$internalSpan['service']])) {
+                    $internalSpan['service'] = $serviceMappings[$internalSpan['service']];
                 }
             }
         }
@@ -420,7 +444,7 @@ final class Tracer implements TracerInterface
             return;
         }
         $span = $scope->getSpan();
-        if ('web.request' !== $span->getResource()) {
+        if (null !== $span->getResource()) {
             return;
         }
         // Normalized URL as the resource name
