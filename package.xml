@@ -10,34 +10,17 @@
         <email>sammyk@php.net</email>
         <active>yes</active>
     </lead>
-    <date>2020-04-01</date>
+    <date>${date}</date>
     <version>
-        <release>0.42.0</release>
-        <api>0.42.0</api>
+        <release>${version}</release>
+        <api>${version}</api>
     </version>
     <stability>
         <release>stable</release>
         <api>stable</api>
     </stability>
     <license uri="https://github.com/DataDog/dd-trace-php/blob/master/LICENSE">BSD 3-Clause</license>
-    <notes>
-        ### Added
-
-        - Close open sandboxed spans on exit (PHP 5) #780
-        - Prehook feature to run tracing closures before the original call #784
-
-        ### Changed
-
-        - Enable background sender (BGS) by default #796, #800
-        - Improves alpine extensions build/verify process #774
-        - Refactor Symfony integration #786
-        - Let curl calculate Content-Length header value when sending requests to the agent #804
-
-        ### Fixed
-
-        - Pass return value as null to tracing closure when value IS_UNDEF #791 (thanks for the report @wajdisawaf!)
-        - Set a sane memory limit when running php from inside post-install hook #792
-    </notes>
+    <notes>${notes}</notes>
     <contents>
         <dir name="/">
             <dir name="src">
