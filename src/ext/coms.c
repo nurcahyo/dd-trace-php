@@ -649,6 +649,7 @@ static void _dd_curl_set_hostname(CURL *curl) {
         char *message = malloc(16 + strlen(agent_url));
         sprintf(message, "Send request to %s", agent_url);
         ddtrace_log_debug(message);
+        free(message);
         free(url);
         free(hostname);
         free(agent_url);
