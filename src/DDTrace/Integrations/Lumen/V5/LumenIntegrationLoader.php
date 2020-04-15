@@ -66,6 +66,10 @@ final class LumenIntegrationLoader
 
         // Trace middleware
         $traceMiddleware = function ($middlewares) {
+            if (!is_array($middlewares)) {
+                $middlewares = [ $middlewares ];
+            }
+
             foreach ($middlewares as $middleware) {
                 // Ignore closures
                 if ($middleware instanceof \Closure) {
