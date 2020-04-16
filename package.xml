@@ -10,17 +10,27 @@
         <email>sammyk@php.net</email>
         <active>yes</active>
     </lead>
-    <date>${date}</date>
+    <date>2020-04-15</date>
     <version>
-        <release>${version}</release>
-        <api>${version}</api>
+        <release>0.43.0</release>
+        <api>0.43.0</api>
     </version>
     <stability>
         <release>stable</release>
         <api>stable</api>
     </stability>
     <license uri="https://github.com/DataDog/dd-trace-php/blob/master/LICENSE">BSD 3-Clause</license>
-    <notes>${notes}</notes>
+    <notes>
+        ### Added
+
+        - Add config env DD_TRACER_AGENT_URL, The url of the trace agent that the tracer will submit to. Takes priority over hostname and port, if set.
+        
+
+        ### Fixed
+        
+        - Fix Lumen integration, Error when middleware passed as string (not an array) fixed.
+
+    </notes>
     <contents>
         <dir name="/">
             <dir name="src">

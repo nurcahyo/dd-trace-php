@@ -60,7 +60,7 @@ For help, check out the documentation at https://docs.datadoghq.com/tracing/lang
 (c) Datadog 2019
 
 Datadog tracing support => enabled
-Version => 1.0.0-nightly
+Version => 0.43.0
 
 Directive => Local Value => Master Value
 ddtrace.disable => Off => Off
